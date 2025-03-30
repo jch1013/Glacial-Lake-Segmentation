@@ -43,11 +43,15 @@ def get_image_dataset():
     for path, subdirs, files in os.walk(data_dir):
         dirname = path.split(os.path.sep)[-1]
         if dirname == 'images':   #Find all 'images' directories
-            images = os.listdir(path)  #List of all image names in this subdirectory
+            images = sorted(os.listdir(path))
             for i, image_name in enumerate(images):  
                 if image_name.endswith(".png"):   #Only read png images...
                 
                     image = cv2.imread(path+"/"+image_name, 1)  #Read each image as BGR
+                    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+
+
                     SIZE_X = (image.shape[1]//patch_size)*patch_size #Nearest size divisible by our patch size
                     SIZE_Y = (image.shape[0]//patch_size)*patch_size #Nearest size divisible by our patch size
                     image = Image.fromarray(image)
@@ -77,11 +81,12 @@ def get_mask_dataset():
     for path, subdirs, files in os.walk(data_dir):
         dirname = path.split(os.path.sep)[-1]
         if dirname == 'masks':   #Find all 'images' directories
-            masks = os.listdir(path)  #List of all image names in this subdirectory
+            masks = sorted(os.listdir(path))
             for i, mask_name in enumerate(masks):  
                 if mask_name.endswith(".tif"):   #Only read png images... (masks in this dataset)
                 
-                    mask = cv2.imread(path+"/"+mask_name, 1)  #Read each image as Grey (or color but remember to map each color to an integer)
+                    mask = cv2.imread(path+"/"+mask_name, 0)  #Read each image as Grey (or color but remember to map each color to an integer)
+                    mask = mask // 255
                     SIZE_X = (mask.shape[1]//patch_size)*patch_size #Nearest size divisible by our patch size
                     SIZE_Y = (mask.shape[0]//patch_size)*patch_size #Nearest size divisible by our patch size
                     mask = Image.fromarray(mask)
@@ -90,14 +95,13 @@ def get_mask_dataset():
         
                     #Extract patches from each image
                     print("Now patchifying mask:", path+"/"+mask_name)
-                    patches_mask = patchify(mask, (patch_size, patch_size, 3), step=patch_size)  #Step=256 for 256 patches means no overlap
+                    patches_mask = patchify(mask, (patch_size, patch_size), step=patch_size)  #Step=256 for 256 patches means no overlap
             
                     for i in range(patches_mask.shape[0]):
                         for j in range(patches_mask.shape[1]):
                             
                             single_patch_mask = patches_mask[i,j,:,:]
-                            #single_patch_img = (single_patch_img.astype('float32')) / 255. #No need to scale masks, but you can do it if you want
-                            single_patch_mask = single_patch_mask[0] #Drop the extra unecessary dimension that patchify adds.                               
+                            # single_patch_mask = single_patch_mask[0] #Drop the extra unecessary dimension that patchify adds.                               
                             mask_dataset.append(single_patch_mask)
     return np.array(mask_dataset)
 
