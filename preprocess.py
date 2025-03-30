@@ -69,16 +69,17 @@ def get_image_dataset():
                             #single_patch_img = (single_patch_img.astype('float32')) / 255. 
                             single_patch_img = single_patch_img[0] #Drop the extra unecessary dimension that patchify adds.                               
                             image_dataset.append(single_patch_img)
-    return image_dataset
+    return np.array(image_dataset)
 
 def get_mask_dataset():
+    fill_masks(data_dir)
     mask_dataset = []  
     for path, subdirs, files in os.walk(data_dir):
         dirname = path.split(os.path.sep)[-1]
         if dirname == 'masks':   #Find all 'images' directories
             masks = os.listdir(path)  #List of all image names in this subdirectory
             for i, mask_name in enumerate(masks):  
-                if mask_name.endswith(".png"):   #Only read png images... (masks in this dataset)
+                if mask_name.endswith(".tif"):   #Only read png images... (masks in this dataset)
                 
                     mask = cv2.imread(path+"/"+mask_name, 1)  #Read each image as Grey (or color but remember to map each color to an integer)
                     SIZE_X = (mask.shape[1]//patch_size)*patch_size #Nearest size divisible by our patch size
@@ -98,11 +99,5 @@ def get_mask_dataset():
                             #single_patch_img = (single_patch_img.astype('float32')) / 255. #No need to scale masks, but you can do it if you want
                             single_patch_mask = single_patch_mask[0] #Drop the extra unecessary dimension that patchify adds.                               
                             mask_dataset.append(single_patch_mask)
-    return mask_dataset
+    return np.array(mask_dataset)
 
-
-#data = get_image_dataset()
-#print(len(data))
-
-#generate_empty_mask('train_mini/images/image_10.png')
-fill_masks(data_dir)
