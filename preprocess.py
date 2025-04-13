@@ -71,7 +71,7 @@ def get_image_dataset():
                             single_patch_img = scaler.fit_transform(single_patch_img.reshape(-1, single_patch_img.shape[-1])).reshape(single_patch_img.shape)
                             
                             #single_patch_img = (single_patch_img.astype('float32')) / 255. 
-                            single_patch_img = single_patch_img[0] #Drop the extra unecessary dimension that patchify adds.                               
+                            single_patch_img = single_patch_img[0] #Drop the extra unecessary dimension that patchify adds.
                             image_dataset.append(single_patch_img)
     return np.array(image_dataset)
 

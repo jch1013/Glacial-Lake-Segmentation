@@ -7,6 +7,8 @@ from keras.layers import Input, Conv2D, MaxPooling2D, UpSampling2D, concatenate,
 from preprocess import get_image_dataset, get_mask_dataset
 from sklearn.model_selection import train_test_split
 import cv2
+import os
+from util import *
 
 
 image_dataset = get_image_dataset()
@@ -88,6 +90,17 @@ def simple_unet_model(IMG_HEIGHT, IMG_WIDTH, IMG_CHANNELS):
 
 labels = np.expand_dims(labels, axis=3)
 X_train, X_test, y_train, y_test = train_test_split(image_dataset, labels, test_size = 0.20, random_state = 42)
+print(f'{len(X_train)} training images loaded')
+
+non_empty_indices = [i for i, m in enumerate(y_train) if np.sum(m) > 0]
+filtered_images = X_train[non_empty_indices]
+filtered_labels = y_train[non_empty_indices]
+
+#compare_image_sets(filtered_images, filtered_labels)
+
+
+# compare_image_sets(X_train, y_train)
+print(f'{len(X_test)} test images loaded')
 
 weights = [0.5, 0.5]
 IMG_HEIGHT = X_train.shape[1]
@@ -95,31 +108,33 @@ IMG_WIDTH  = X_train.shape[2]
 
 model_name = 'test_model.keras'
 
-#model = simple_unet_model(IMG_HEIGHT, IMG_WIDTH, image_dataset.shape[3])
-#test = model.fit(X_train, y_train, batch_size=16, verbose=1, epochs=1, validation_data = (X_test, y_test), shuffle=False)
-#model.save(model_name)
+model = simple_unet_model(IMG_HEIGHT, IMG_WIDTH, image_dataset.shape[3])
+if not os.path.exists('test_model.keras'):
+    test = model.fit(filtered_images, filtered_labels, batch_size=16, verbose=1, epochs=25, validation_data = (X_test, y_test), shuffle=False)
+    model.save(model_name)
+else:
+    model.load_weights(model_name)
 
-test_model = simple_unet_model(IMG_HEIGHT, IMG_WIDTH, image_dataset.shape[3])
-test_model.load_weights(model_name)
-
-test_img_other = cv2.imread('train_mini/images/image_9.png', 1)
+# Load image
+test_img_other = cv2.imread('train_mini/images/image_9.png')  # Default is color
 test_img_other = cv2.cvtColor(test_img_other, cv2.COLOR_BGR2RGB)
 
-#test_img_other = cv2.imread('data/test_images/img8.tif', 0)
-test_img_other_norm = np.expand_dims(normalize(np.array(test_img_other), axis=1),2)
-test_img_other_norm=test_img_other_norm[:,:,0][:,:,None]
-test_img_other_input=np.expand_dims(test_img_other_norm, 0)
+# Resize if necessary
+# REPLACE LATER WITH SLIDING WINDOW TO PREVENT DISTORTION
 
-#Predict and threshold for values above 0.5 probability
-#Change the probability threshold to low value (e.g. 0.05) for watershed demo.
+test_img_other = cv2.resize(test_img_other, (IMG_WIDTH, IMG_HEIGHT))
+
+# Normalize to [0,1]
+test_img_other_norm = test_img_other.astype(np.float32) / 255.0
+
+test_img_other_input = np.expand_dims(test_img_other_norm, axis=0)
 print(test_img_other.shape)
-prediction_other = (test_model.predict(test_img_other_input) > 0.5).astype(np.uint8)
+prediction_other = np.squeeze((model.predict(test_img_other_input) > 0.25).astype(np.uint8), axis=0)
 
-plt.figure(figsize=(16, 8))
-plt.subplot(1,2,1)
-plt.title('External Image')
-plt.imshow(test_img_other)
-plt.subplot(1,2,2)
-plt.title('Prediction of external Image')
-#plt.imshow(prediction_other, cmap='gray')
-plt.show()
+
+for i in range(len(X_test)):
+    # shape to (1, 256, 256, 3)
+    img = np.expand_dims(X_test[i], axis=0) 
+    prediction = np.squeeze((model.predict(img) > 0.35).astype(np.uint8), axis=0)
+    compare_image_label_prediction(X_test[i], y_test[i], prediction)
+    j, d = calculate_jaccard_and_dice(img, prediction)

@@ -7,7 +7,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import requests
 from typing import Any
-from utils import plot_image
 import imageio
 
 
@@ -253,6 +252,9 @@ filepath='/Users/jacksonhayward/Desktop/vancouver_island_train_set/'
 
 
 p = '/Users/jacksonhayward/Desktop/miniset'
+
+
+"""
 files = [img for img in os.listdir(p) if img.endswith('.png')]
 for i in range(len(files)):
     file = files[i]
@@ -262,3 +264,4 @@ for i in range(len(files)):
     new_p = os.path.join(new_dir, file)
     os.rename(old_p, new_p)
 
+"""
