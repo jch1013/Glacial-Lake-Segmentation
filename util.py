@@ -1,5 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.metrics import jaccard_score
+from monai.metrics import DiceMetric
+import torch
 
 """
 Utility file to store various useful methods for working with this code
@@ -40,23 +43,23 @@ def compare_image_label_prediction(image, label, prediction):
     plt.tight_layout()
     plt.show()
 
-def calculate_jaccard_and_dice(y_true, y_pred):
+def calculate_jaccard(y_true, y_pred):
     """
     y_true and y_pred should be binary masks (0 or 1), same shape.
     """
-    # Ensure both are binary (0 or 1)
-    y_true = y_true.astype(np.bool_)
-    y_pred = y_pred.astype(np.bool_)
+    y_true = np.asarray(y_true).astype(bool)
+    y_pred = np.asarray(y_pred).astype(bool)
 
-    # Jaccard Index (IoU)
     intersection = np.logical_and(y_true, y_pred).sum()
     union = np.logical_or(y_true, y_pred).sum()
-    jaccard = intersection / union if union != 0 else 1.0
+    return intersection / union if union != 0 else 1.0
 
-    # Dice Coefficient
-    dice = (2 * intersection) / (y_true.sum() + y_pred.sum()) if (y_true.sum() + y_pred.sum()) != 0 else 1.0
 
-    print(f"Jaccard Index (IoU): {jaccard:.4f}")
-    print(f"Dice Coefficient: {dice:.4f}")
+def calculate_dice(y_true, y_pred):
+    y_true = np.asarray(y_true).astype(bool)
+    y_pred = np.asarray(y_pred).astype(bool)
 
-    return jaccard, dice
+    intersection = np.logical_and(y_true, y_pred).sum()
+    total = y_true.sum() + y_pred.sum()
+
+    return 2.0 * intersection / total if total > 0 else 1.0
