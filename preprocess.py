@@ -37,7 +37,7 @@ def fill_masks(data_dir):
             image_path = os.path.join(image_dir, image)
             generate_empty_mask(image_path)
 
-def get_image_dataset():
+def get_image_dataset(blur=False):
     image_dataset = []
     data_dir = 'train_mini'
     for path, subdirs, files in os.walk(data_dir):
@@ -56,7 +56,11 @@ def get_image_dataset():
                     SIZE_Y = (image.shape[0]//patch_size)*patch_size #Nearest size divisible by our patch size
                     image = Image.fromarray(image)
                     image = image.crop((0 ,0, SIZE_X, SIZE_Y))  #Crop from top left corner
-                    image = np.array(image)             
+                    image = np.array(image)
+                    
+                    # apply blur if needed
+                    if blur:
+                        image = cv2.GaussianBlur(image, (3, 3), 0)
         
                     #Extract patches from each image
                     print("Now patchifying image:", path+"/"+image_name)
@@ -75,7 +79,7 @@ def get_image_dataset():
                             image_dataset.append(single_patch_img)
     return np.array(image_dataset)
 
-def get_mask_dataset():
+def get_mask_dataset(blur=False):
     fill_masks(data_dir)
     mask_dataset = []  
     for path, subdirs, files in os.walk(data_dir):
@@ -91,7 +95,11 @@ def get_mask_dataset():
                     SIZE_Y = (mask.shape[0]//patch_size)*patch_size #Nearest size divisible by our patch size
                     mask = Image.fromarray(mask)
                     mask = mask.crop((0 ,0, SIZE_X, SIZE_Y))  #Crop from top left corner
-                    mask = np.array(mask)             
+                    mask = np.array(mask) 
+
+                    # apply blur if needed
+                    if blur:
+                        mask = cv2.GaussianBlur(mask, (3, 3), 0)            
         
                     #Extract patches from each image
                     print("Now patchifying mask:", path+"/"+mask_name)
