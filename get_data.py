@@ -5,9 +5,7 @@ import os
 import math
 import matplotlib.pyplot as plt
 import numpy as np
-import requests
 from typing import Any
-import imageio
 import cv2
 import json
 
@@ -17,12 +15,9 @@ from sentinelhub import (
     CRS,
     BBox,
     DataCollection,
-    DownloadRequest,
     MimeType,
     MosaickingOrder,
-    SentinelHubDownloadClient,
     SentinelHubRequest,
-    bbox_to_dimensions,
 )
 # client id: af4d5206-2d5d-4f9a-8cd9-0442590aa1d5
 # client secret: 6vSjpHM4kLtQoXcrsvD2y0ZqPgd5dcIz
@@ -276,7 +271,7 @@ class SentinelTileDownloader:
                 png_filepath = filepath + '.png'
                 if not os.path.exists(png_filepath):
                     img = self.get_image_square(bbox.lower_left[0], bbox.lower_left[1])
-                    self.save_image(img, bbox, png_filepath)
+                    self.save_image(img, png_filepath)
 
                     # create entry for json file to keep track of image locations on map
                     json_data = {
@@ -293,15 +288,18 @@ class SentinelTileDownloader:
         with open(self.data_folder + "/images.json", "w") as f:
             json.dump(image_data, f, indent=2)
 
-    def save_image(self, image, bbox, filepath) :
+    def save_image(self, image, filepath) :
     
+        clip_range = (0, 255)
+        image = image * 1.2
+        image = np.clip(image, *clip_range)
 
-        # Ensure the image is in the correct format (uint8)
-        #p2, p95 = np.percentile(image, (2, 98))
-        #image = np.clip(image, p2, p95)
-        #image = (image - p2) / (p95 - p2)
-        #image = (image * 255).astype(np.uint8)
+        gamma = 2.2
+        image = np.power(np.clip(image, 0, 255) / 255.0, gamma) * 255
+
+        image = np.clip(image, *clip_range)
         image = image[..., ::-1]
+        print(np.max(image))
 
         # Save the image using OpenCV
         try:
