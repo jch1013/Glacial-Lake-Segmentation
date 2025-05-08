@@ -5,7 +5,6 @@ from matplotlib import pyplot as plt
 from patchify import patchify
 from PIL import Image
 import tensorflow as tf
-from tensorflow.keras.metrics import MeanIoU
 os.environ["SM_FRAMEWORK"] = "tf.keras"
 import segmentation_models as sm
 from sklearn.preprocessing import MinMaxScaler
@@ -37,9 +36,8 @@ def fill_masks(data_dir):
             image_path = os.path.join(image_dir, image)
             generate_empty_mask(image_path)
 
-def get_image_dataset(blur=False):
+def get_image_dataset(data_dir, blur=False):
     image_dataset = []
-    data_dir = 'train_mini'
     for path, subdirs, files in os.walk(data_dir):
         dirname = path.split(os.path.sep)[-1]
         if dirname == 'images':   #Find all 'images' directories
@@ -49,8 +47,6 @@ def get_image_dataset(blur=False):
                 
                     image = cv2.imread(path+"/"+image_name, 1)  #Read each image as BGR
                     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-
 
                     SIZE_X = (image.shape[1]//patch_size)*patch_size #Nearest size divisible by our patch size
                     SIZE_Y = (image.shape[0]//patch_size)*patch_size #Nearest size divisible by our patch size
@@ -79,7 +75,7 @@ def get_image_dataset(blur=False):
                             image_dataset.append(single_patch_img)
     return np.array(image_dataset)
 
-def get_mask_dataset(blur=False):
+def get_mask_dataset(data_dir, blur=False):
     fill_masks(data_dir)
     mask_dataset = []  
     for path, subdirs, files in os.walk(data_dir):
