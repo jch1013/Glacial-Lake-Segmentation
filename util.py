@@ -56,6 +56,9 @@ def calculate_jaccard(y_true, y_pred):
 
 
 def calculate_dice(y_true, y_pred):
+    """
+    y_true and y_pred should be binary masks (0 or 1), same shape.
+    """
     y_true = np.asarray(y_true).astype(bool)
     y_pred = np.asarray(y_pred).astype(bool)
 
