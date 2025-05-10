@@ -1,14 +1,9 @@
 import os
 import cv2
 import numpy as np
-from matplotlib import pyplot as plt
-from patchify import patchify
 from PIL import Image
-import tensorflow as tf
 os.environ["SM_FRAMEWORK"] = "tf.keras"
-import segmentation_models as sm
 from sklearn.preprocessing import MinMaxScaler
-from util import compare_images
 
 
 class preprocesser:
