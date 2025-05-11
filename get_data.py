@@ -21,9 +21,6 @@ from sentinelhub import (
 )
 
 
-# client id: af4d5206-2d5d-4f9a-8cd9-0442590aa1d5
-# client secret: 6vSjpHM4kLtQoXcrsvD2y0ZqPgd5dcIz
-
 # bounds for olympic mountains
 #upper_right =  (-123.021647, 47.973022)
 #lower_left = (-123.819648, 47.382983)
