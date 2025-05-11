@@ -34,6 +34,11 @@ class preprocesser:
                 self.generate_empty_mask(image_path)
 
     def get_image_dataset(self, blur=True):
+        """
+        Loads images in the /images folder within the passed root directory, and standardizes images. 
+        Returns a numpy array of images
+        
+        """
         image_dataset = []
         for path, subdirs, files in os.walk(self.root_dir):
             dirname = path.split(os.path.sep)[-1]
@@ -48,7 +53,7 @@ class preprocesser:
                         image = Image.fromarray(image)
                         image = np.array(image)
                         
-                        # FIX THIS LATER - STANDARDIZE IMAGE SHAPES WHEN DOWNLOADING TO AVOID DISTORTING
+                        # FIX THIS LATER - STANDARDIZE IMAGE SHAPES WHEN DOWNLOADING TO AVOID DISTORTION
                         image = cv2.resize(image, (1024, 1024))
                         
                         # apply blur if needed
@@ -65,7 +70,7 @@ class preprocesser:
         mask_dataset = []  
         for path, subdirs, files in os.walk(self.root_dir):
             dirname = path.split(os.path.sep)[-1]
-            if dirname == 'masks':   #Find all 'images' directories
+            if dirname == 'masks':   #Find the '/masks' folder
                 masks = sorted(os.listdir(path))
                 for i, mask_name in enumerate(masks):  
                     if mask_name.endswith(".tif"):   #Only read png images... (masks in this dataset)
