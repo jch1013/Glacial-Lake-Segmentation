@@ -19,6 +19,8 @@ from sentinelhub import (
     MosaickingOrder,
     SentinelHubRequest,
 )
+
+
 # client id: af4d5206-2d5d-4f9a-8cd9-0442590aa1d5
 # client secret: 6vSjpHM4kLtQoXcrsvD2y0ZqPgd5dcIz
 
@@ -40,7 +42,7 @@ lower_left = (-121.534044, 46.441355)
 # lower_left = (-125.998912, 49.383343)
 
 
-
+HEIGHT, WIDTH = 1024, 1024
 
 class SentinelTileDownloader:
     def __init__(self, tile_size_km, lon_lower_left, lat_lower_left, lon_upper_right, lat_upper_right, filepath, client_id = None, client_secret = None):
@@ -149,7 +151,7 @@ class SentinelTileDownloader:
             ],
             responses=[SentinelHubRequest.output_response("default", MimeType.PNG)],
             bbox=bbox,
-            size=(1024, 1024), # set image size to 1024 x 1024 so resizing later is not needed
+            size=(HEIGHT, WIDTH),
             config=config,
         )
         true_color_imgs = request_true_color.get_data()
@@ -271,7 +273,7 @@ class SentinelTileDownloader:
                 png_filepath = filepath + '.png'
                 if not os.path.exists(png_filepath):
                     img = self.get_image_square(bbox.lower_left[0], bbox.lower_left[1])
-                    self.save_image(img, png_filepath)
+                    self.save_image(img, png_filepath, factor=3.5, clip_range=(0, 255))
 
                     # create entry for json file to keep track of image locations on map
                     json_data = {
@@ -288,24 +290,20 @@ class SentinelTileDownloader:
         with open(self.data_folder + "/images.json", "w") as f:
             json.dump(image_data, f, indent=2)
 
-    def save_image(self, image, filepath) :
-    
-        clip_range = (0, 255)
-        image = image * 1.2
-        image = np.clip(image, *clip_range)
+    def save_image(self, image: np.ndarray, filepath: str, factor: float = 1.0, clip_range: tuple[float, float] | None = None, **kwargs: Any):
 
-        gamma = 2.2
-        image = np.power(np.clip(image, 0, 255) / 255.0, gamma) * 255
+        if clip_range is not None:
+            image = np.clip(image * factor, *clip_range)
+        else:
+            image = image * factor
 
-        image = np.clip(image, *clip_range)
-        image = image[..., ::-1]
-        print(np.max(image))
+        image = np.clip(image, 0, 255).astype(np.uint8)
 
+        # Convert RGB to BGR for OpenCV saving
+        image_bgr = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        
         # Save the image using OpenCV
-        try:
-            cv2.imwrite(filepath, image)
-        except Exception as e:
-            print(f"Error saving image: {e}")
+        cv2.imwrite(filepath, image_bgr)
 
 lower_left = (-123.826859, 47.509866)
 upper_right = (-123.031568, 47.995574)
