@@ -22,21 +22,36 @@ from sentinelhub import (
 
 
 # bounds for olympic mountains
-#upper_right =  (-123.021647, 47.973022)
-#lower_left = (-123.819648, 47.382983)
+# lower_left = (-123.826859, 47.509866)
+# upper_right = (-123.031568, 47.995574)
 
 # bounds for mt. adams
-#upper_right =  [-121.423597, 46.266517]
-#lower_left = [-121.593377, 46.134413]
+# upper_right =  [-121.423597, 46.266517]
+# lower_left = [-121.593377, 46.134413]
 
 # bounds for goat rocks
-upper_right = (-121.393653, 46.581592)
-lower_left = (-121.534044, 46.441355)
+# upper_right = (-121.393653, 46.581592)
+# lower_left = (-121.534044, 46.441355)
 
+# bounds for north cascades north
+# lower_left = (-122.003949, 48.638660)
+# upper_right = (-120.562058, 49)
 
-# bounds for vancouver island training set
-# upper_right = [-125.349722, 49.826193]
-# lower_left = (-125.998912, 49.383343)
+# bounds for north cascades south
+# lower_left = (-121.554531, 47.902931)
+# upper_right = (-120.656781, 48.638660)
+
+# bounds for alpine lakes
+# lower_left = (-121.462225, 47.422051)
+# upper_right = (-120.712952, 47.712973)
+
+# bounds for mount rainier area
+# lower_left = (-121.902585, 46.776775)
+# upper_right = (-121.600930, 46.957635)
+
+# bounds for boulder river area
+lower_left = (-121.724466, 48.153833)
+upper_right = (-121.645673, 48.227564)
 
 
 HEIGHT, WIDTH = 1024, 1024
@@ -272,14 +287,14 @@ class SentinelTileDownloader:
                     img = self.get_image_square(bbox.lower_left[0], bbox.lower_left[1])
                     self.save_image(img, png_filepath, factor=3.5, clip_range=(0, 255))
 
-                    # create entry for json file to keep track of image locations on map
-                    json_data = {
-                        'image_path' : png_filepath, 
-                        "bbox_lower_left" : bbox.lower_left,
-                        "bbox_upper_right" : bbox.upper_right
-                    }
+                # create entry for json file to keep track of image locations on map
+                json_data = {
+                    'image_path' : png_filepath, 
+                    "bbox_lower_left" : bbox.lower_left,
+                    "bbox_upper_right" : bbox.upper_right
+                }
 
-                    image_data.append(json_data)
+                image_data.append(json_data)
                 processed += 1
                 print(f'Processed {processed} / {total_images}')
 
@@ -302,8 +317,7 @@ class SentinelTileDownloader:
         # Save the image using OpenCV
         cv2.imwrite(filepath, image_bgr)
 
-lower_left = (-123.826859, 47.509866)
-upper_right = (-123.031568, 47.995574)
-test_path = '/Users/jacksonhayward/Desktop/Olympic_Images'
+
+test_path = '/Users/jacksonhayward/Desktop/boulder_river'
 data_getter = SentinelTileDownloader(2, lower_left[0], lower_left[1], upper_right[0], upper_right[1], test_path)
 data_getter.get_images_from_region()
