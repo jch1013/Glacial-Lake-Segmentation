@@ -15,6 +15,7 @@ class preprocesser:
         image_filename = path_to_image.split(os.path.sep)[-1]
         image_filename = image_filename.split('.')[0]
         mask_filename = os.path.join(self.root_dir, 'masks', image_filename + '.tif')
+        mask_filename = mask_filename.replace('image', 'mask')
         if os.path.exists(mask_filename): return
         image = cv2.imread(path_to_image)
         height, width, channels = image.shape
@@ -29,6 +30,7 @@ class preprocesser:
         image_dir_files = os.listdir(image_dir)
         for image in image_dir_files:
             mask_name = image.replace('.png', '.tif')
+            mask_name = mask_name.replace('image', 'mask')
             if not os.path.exists(os.path.join(mask_dir, mask_name)):
                 image_path = os.path.join(image_dir, image)
                 self.generate_empty_mask(image_path)
@@ -52,15 +54,13 @@ class preprocesser:
                         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                         image = Image.fromarray(image)
                         image = np.array(image)
-                        
-                        # FIX THIS LATER - STANDARDIZE IMAGE SHAPES WHEN DOWNLOADING TO AVOID DISTORTION
-                        image = cv2.resize(image, (1024, 1024))
-                        
+
                         # apply blur if needed
                         if blur:
                             image = cv2.GaussianBlur(image, (3, 3), 0)
-                        
+
                         scaled_image = self.scaler.fit_transform(image.reshape(-1, image.shape[-1])).reshape(image.shape)
+                        scaled_image = scaled_image.astype(np.float32)
                         image_dataset.append(scaled_image)
                         print(f'Loaded image {image_path}')
         return np.array(image_dataset)
@@ -79,12 +79,11 @@ class preprocesser:
                         mask = mask // 255
                         mask = np.array(mask) 
 
-                        # FIX LATER - STANDARDIZE SHAPE IN DATA PREPROCESSING
-                        mask = cv2.resize(mask, (1024, 1024))
-
                         # apply blur if needed
                         if blur:
-                            mask = cv2.GaussianBlur(mask, (3, 3), 0)            
+                            mask = cv2.GaussianBlur(mask, (3, 3), 0)     
+                        print(mask.shape, mask.dtype, np.unique(mask))
+       
             
                         mask_dataset.append(mask)
         return np.array(mask_dataset)
