@@ -10,11 +10,13 @@ Utility file to store various useful methods for working with this code
 def compare_images(image, label):
     plt.figure(figsize=(16, 8))
     plt.subplot(1,2,1)
-    plt.title('External Image')
+    plt.title('Satellite Image')
     plt.imshow(image)
+    plt.axis('off')
     plt.subplot(1,2,2)
-    plt.title('Prediction of external Image')
+    plt.title('Lake Prediction')
     plt.imshow(label, cmap='gray')
+    plt.axis('off')
     plt.show()
 
 

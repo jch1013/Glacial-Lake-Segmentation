@@ -123,6 +123,7 @@ class unet_segmentation_model:
             jaccard_val = calculate_jaccard(y_test[i], prediction)
 
             compare_image_label_prediction(X_test[i], y_test[i], prediction)
+            compare_images(X_test[i], prediction)
 
             print(f'Dice score:    {dice_val}')
             print(f'Jaccard score: {jaccard_val}')
