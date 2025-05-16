@@ -1,8 +1,5 @@
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.metrics import jaccard_score
-from monai.metrics import DiceMetric
-import torch
 
 """
 Utility file to store various useful methods for working with this code
