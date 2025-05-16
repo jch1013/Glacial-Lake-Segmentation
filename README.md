@@ -19,7 +19,8 @@ The goal was to automate the discovery of new glacial lakes — potential hiking
 - **APIs & Tools:** Sentinel Hub API, matplotlib
 
 ## Screenshots
-> _Coming soon_: visual examples of input satellite images alongside predicted glacial lake masks.
+<img width="378" alt="Screenshot 2025-05-13 at 4 36 49 PM" src="https://github.com/user-attachments/assets/c9237d2b-6d06-4039-baec-4400e545c8d9" />
+
 
 ## What I Learned
 - Developed a deeper understanding of semantic segmentation architectures, especially UNet
@@ -29,7 +30,6 @@ The goal was to automate the discovery of new glacial lakes — potential hiking
 ## Future Improvements
 - 🔁 Train on a larger and more geographically diverse dataset
 - 🧠 Further model fine-tuning and hyperparameter optimization
-- 🌦️ Add cloud masking and weather condition filtering
 - 🌍 Potential integration with GIS platforms for route planning
 
 ## Why I Built This
