@@ -318,6 +318,8 @@ class SentinelTileDownloader:
         cv2.imwrite(filepath, image_bgr)
 
 
-test_path = '/Users/jacksonhayward/Desktop/boulder_river'
+lower_left = (-0.777883, 42.579047)
+upper_right = (2.287338, 42.834169)
+test_path = '/Users/jacksonhayward/Desktop/pyrenees'
 data_getter = SentinelTileDownloader(2, lower_left[0], lower_left[1], upper_right[0], upper_right[1], test_path)
 data_getter.get_images_from_region()
