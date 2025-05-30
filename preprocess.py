@@ -12,11 +12,14 @@ class preprocesser:
         self.scaler = MinMaxScaler()
 
     def generate_empty_mask(self, path_to_image):
+        if path_to_image.endswith('.DS_Store'):
+            return
         image_filename = path_to_image.split(os.path.sep)[-1]
         image_filename = image_filename.split('.')[0]
         mask_filename = os.path.join(self.root_dir, 'masks', image_filename + '.tif')
         mask_filename = mask_filename.replace('image', 'mask')
         if os.path.exists(mask_filename): return
+        print(path_to_image)
         image = cv2.imread(path_to_image)
         height, width, channels = image.shape
         mask = np.zeros((height, width), dtype=np.uint8)
