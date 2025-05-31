@@ -84,7 +84,6 @@ class classifier:
         images, labels = self.load_data(path_to_training_folder)
         X_train, X_val, y_train, y_val = train_test_split(
             images, labels, test_size=0.2, stratify=labels, random_state=42)
-        print(type(y_train))
         history = self.model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=epochs, batch_size=2)
         
         if not model_name.endswith('.keras'): model_name += '.keras'
