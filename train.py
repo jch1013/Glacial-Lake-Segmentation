@@ -80,7 +80,7 @@ class unet_segmentation_model:
     
         return model
 
-    def train_model(self, model_name, training_directory, epochs):
+    def train_model(self, model_name, training_directory, epochs, train_with_negative = False):
         loader = preprocesser(training_directory)
         image_dataset = loader.get_image_dataset()
         labels_dataset = loader.get_mask_dataset()
@@ -94,6 +94,16 @@ class unet_segmentation_model:
 
         # Create train and test splits
         X_train, X_test, y_train, y_test = train_test_split(image_dataset, labels, test_size = 0.2, random_state = 42)
+
+        # if train with negative is False (default), remove all empty masks and accompanying images
+        if not train_with_negative:
+            X_train_clean, y_train_clean = [], []
+            for i in range(len(X_train)):
+                if np.max(y_train[i]) > 0:
+                    X_train_clean.append(X_train[i])
+                    y_train_clean.append(y_train[i])
+            X_train = X_train_clean
+            y_train = y_train_clean
 
         # Verify that the model name has the .keras extension, and if not, add it
         if not model_name.endswith('.keras'):

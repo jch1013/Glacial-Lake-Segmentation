@@ -2,9 +2,15 @@ import tensorflow as tf
 from tensorflow.keras import layers, models
 import numpy as np
 from preprocess import preprocesser
+from sklearn.model_selection import train_test_split
+import os
+
 
 class classifier:
     def __init__(self, height=1024, width=1024, channels=3):
+        """
+        Default to size 1024,1024,3 as specified in the download process from sentinelhub
+        """
         self.IMAGE_HEIGHT = height
         self.IMAGE_WIDTH = width
         self.IMAGE_CHANNELS = channels
@@ -33,7 +39,7 @@ class classifier:
         if not self.IMAGE_CHANNELS:
             self.IMAGE_CHANNELS = images[0].shape[2]
 
-        labels = [1 if np.max(mask) > 0 else 0 for mask in masks]
+        labels = np.asarray([1 if np.max(mask) > 0 else 0 for mask in masks])
 
         return images, labels
     
@@ -68,10 +74,26 @@ class classifier:
             layers.Dropout(0.5),
             layers.Dense(1, activation='sigmoid')
         ])
+
+        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+
         return model
     
+
+    def train(self, path_to_training_folder, epochs, model_name):
+        images, labels = self.load_data(path_to_training_folder)
+        X_train, X_val, y_train, y_val = train_test_split(
+            images, labels, test_size=0.2, stratify=labels, random_state=42)
+        print(type(y_train))
+        history = self.model.fit(X_train, y_train, validation_data=(X_val, y_val), epochs=epochs, batch_size=2)
+        
+        if not model_name.endswith('.keras'): model_name += '.keras'
+        model_path = os.path.join('models', model_name)
+        self.model.save(model_path)
+
+
+    
 c = classifier()
-images, labels = c.load_data('train_mini')
-print(labels)
+c.train('/Users/jacksonhayward/Desktop/satellite_images/glacial_train_set', 10, 'test_model_2')
 
 

@@ -12,14 +12,14 @@ class preprocesser:
         self.scaler = MinMaxScaler()
 
     def generate_empty_mask(self, path_to_image):
-        if path_to_image.endswith('.DS_Store'):
+        if not path_to_image.endswith('.png'):
             return
         image_filename = path_to_image.split(os.path.sep)[-1]
-        image_filename = image_filename.split('.')[0]
+        image_filename = os.path.splitext(image_filename)[0]
         mask_filename = os.path.join(self.root_dir, 'masks', image_filename + '.tif')
-        mask_filename = mask_filename.replace('image', 'mask')
+
         if os.path.exists(mask_filename): return
-        print(path_to_image)
+
         image = cv2.imread(path_to_image)
         height, width, channels = image.shape
         mask = np.zeros((height, width), dtype=np.uint8)
@@ -42,7 +42,6 @@ class preprocesser:
         """
         Loads images in the /images folder within the passed root directory, and standardizes images. 
         Returns a numpy array of images
-        
         """
         image_dataset = []
         for path, subdirs, files in os.walk(self.root_dir):
@@ -52,7 +51,7 @@ class preprocesser:
                 for i, image_name in enumerate(images):  
                     if image_name.endswith(".png"):   #Only read png images...
                     
-                        image_path = path+"/"+image_name
+                        image_path = os.path.join(path, image_name)
                         image = cv2.imread(image_path, 1)  #Read each image as BGR
                         image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
                         image = Image.fromarray(image)
@@ -69,8 +68,13 @@ class preprocesser:
         return np.array(image_dataset)
     
     def get_mask_dataset(self, blur=True):
-        self.fill_missing_masks()
-        mask_dataset = []  
+        """
+        Loads masks in the /masks folder within the passed root directory.
+        Returns a numpy array of masks
+        """
+
+        self.fill_missing_masks() # generate empty masks for masks not provided
+        mask_dataset = []
         for path, subdirs, files in os.walk(self.root_dir):
             dirname = path.split(os.path.sep)[-1]
             if dirname == 'masks':   #Find the '/masks' folder
@@ -78,16 +82,16 @@ class preprocesser:
                 for i, mask_name in enumerate(masks):  
                     if mask_name.endswith(".tif"):   #Only read png images... (masks in this dataset)
                     
-                        mask = cv2.imread(path+"/"+mask_name, 0)  #Read each image as Grey (or color but remember to map each color to an integer)
+                        mask_path = os.path.join(path, mask_name)
+                        mask = cv2.imread(mask_path, 0)  #Read each image as Grey (or color but remember to map each color to an integer)
                         mask = mask // 255
                         mask = np.array(mask) 
 
                         # apply blur if needed
                         if blur:
-                            mask = cv2.GaussianBlur(mask, (3, 3), 0)     
-                        print(mask.shape, mask.dtype, np.unique(mask))
-       
-            
+                            mask = cv2.GaussianBlur(mask, (3, 3), 0)
+
+                        print(f'Loaded mask {mask_path}')
                         mask_dataset.append(mask)
         return np.array(mask_dataset)
     
